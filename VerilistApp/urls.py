@@ -12,5 +12,5 @@ urlpatterns = [
     path('checklists/<uuid:list_id>/tasks/new/', views.TaskView.as_view()),
     path('checklists/<uuid:list_id>/tasks/<uuid:task_id>/', views.TaskViewDetail.as_view()),
     path('sendmail/', tasks.send_mail_to_all, name='sendmail'),
-    path('schedulemail/', tasks.schedule_mail, name='schedule mail')
+    path('schedulemail/', tasks.schedule_mail, name='schedule mail'),
 ]

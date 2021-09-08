@@ -1,9 +1,10 @@
-from datetime import datetime, timezone
-from django.http.response import HttpResponse
+from datetime import datetime
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth.models import User
-from rest_framework import views, generics
+from rest_framework.pagination import LimitOffsetPagination
+from rest_framework import views
+from rest_framework.generics import ListAPIView
 from .serializers import ListSerializer, TaskSerializer
 from .models import List, Task
 from .services import get_list_or_404
@@ -26,7 +27,7 @@ def apiOverview(request):
     return Response(api_urls)
 
 
-class TaskListViewSet(views.APIView):
+class TaskListViewSet(views.APIView, LimitOffsetPagination):
 
     def get(self, request):
         checkLists = []
@@ -41,7 +42,9 @@ class TaskListViewSet(views.APIView):
                 tasks.append(task.get_detail())
             taskListDetails["tasks"] = tasks
             checkLists.append(taskListDetails)
-        return create_response(data=checkLists, code=200)
+        results = self.paginate_queryset(checkLists, request, view=self)
+        # return create_response(data=checkLists, code=200)
+        return self.get_paginated_response(results)
 
     def post(self, request):
         if not request.user.is_authenticated:
@@ -115,17 +118,25 @@ class TaskView(views.APIView):
     def post(self, request, list_id):
         if not request.user.is_authenticated:
             return create_response(data="User Not Authenticated", code=403)
-        serializer_instance = TaskSerializer(data=request.data)
-
+        serializer_instance = TaskSerializer(data=request.data, many=True)
+        print(serializer_instance)
         if not serializer_instance.is_valid():
             return create_response(data=serializer_instance.errors, code=403)
-
-        validated_data = serializer_instance.validated_data
-        tasks = List.objects.get(id=list_id)
-        taskList = Task.objects.create(title=validated_data.get('title', ''), description=validated_data.get(
-            'description', ''), status=validated_data.get('status', ''), priority=validated_data.get('priority', ''), due_date=validated_data.get('due_date', ''), completed_At=validated_data.get('completed_At', ''))
-        taskList.save()
-        return create_response(data=taskList.taskId, code=200, message="Created Successfully")
+        # validated_data = serializer_instance.validated_data
+        tasks = serializer_instance.validated_data
+        task_list = List.objects.get(id=list_id)
+        for task in tasks:
+            Task.objects.create(
+            list_name = task_list,
+            title=task.get('title',''),
+            description=task.get('description', ''),
+            status=task.get('status', ''),
+            priority=task.get('priority', ''),
+            due_date=task.get('due_date', ''),
+            completed_At=task.get('completed_At', '')
+            )
+        # taskList.save()
+        return create_response(data=tasks, code=200, message="Created Successfully") 
 
 
 class TaskViewDetail(views.APIView):

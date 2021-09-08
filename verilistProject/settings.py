@@ -139,7 +139,7 @@ CELERY_TIMEZONE = 'Asia/Kolkata'
 
 CELERY_RESULT_BACKEND = 'django-db'
 
-#CELERY BEAT
+# CELERY BEAT
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 
@@ -148,6 +148,12 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_USE_TLS = True
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
-EMAIL_HOST_USER ='dishant.rathi@digiqt.com'
+EMAIL_HOST_USER = 'dishant.rathi@digiqt.com'
 EMAIL_HOST_PASSWORD = ""
 DEFAULT_FROM_EMAIL = 'Celery <dishant.rathi@digiqt.com>'
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 5,
+}
